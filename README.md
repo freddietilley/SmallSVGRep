@@ -31,4 +31,4 @@ The SVG_logo.svg sample image is licenced under the [CC 2.5](https://creativecom
 
 ## License ##
 [BSD (Berkeley Software Distribution) License](http://www.opensource.org/licenses/bsd-license.php).
-Copyright (c) 2015-2015, Impending
+Copyright (c) 2017, Impending
