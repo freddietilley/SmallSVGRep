@@ -704,7 +704,7 @@ typedef struct
             }
 
             if (node.attributes[@"style"] != nil) {
-                NSDictionary *style = GetStylePropertiesFromString(node.attributes[@"style"]);
+                //NSDictionary *style = GetStylePropertiesFromString(node.attributes[@"style"]);
                 //NSLog(@"scanned style properties: %@", [node.attributes[@"style"] styleProperties]);
             }
 
