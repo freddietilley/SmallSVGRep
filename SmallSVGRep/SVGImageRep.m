@@ -73,7 +73,8 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor);
 
 @end
 
-@interface SVGDocumentParser: NSObject  <NSXMLParserDelegate> {
+@interface SVGDocumentParser: NSObject  <NSXMLParserDelegate>
+{
     @private
     SVGDocument *_document;
     SVGNode *_parentNode;
@@ -105,7 +106,8 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor);
     return YES;
 }
 
-+ (instancetype)imageRepWithData:(NSData*)data {
++ (instancetype)imageRepWithData:(NSData*)data
+{
     return [[[self class] alloc] initWithData: data];
 }
 
@@ -113,14 +115,16 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor);
 {
     self = [super init];
 
-    if (self != nil) {
+    if (self != nil)
+    {
         _doc = [SVGDocumentParser parseData: data];
     }
 
     return self;
 }
 
-- (NSSize)size {
+- (NSSize)size
+{
     return NSMakeSize(100.0f, 100.0f);
 }
 
@@ -130,26 +134,34 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor);
 
     [path transformUsingAffineTransform: transform];
 
-    if (element.fillColor != nil) {
+    if (element.fillColor != nil)
+    {
         [element.fillColor set];
         [path fill];
-    } else {
-        if (element.parent != nil && [element.parent isKindOfClass: [SVGElement class]] && ((SVGElement*)element.parent).fillColor != nil) {
+    }
+    else
+    {
+        if (element.parent != nil && [element.parent isKindOfClass: [SVGElement class]] && ((SVGElement*)element.parent).fillColor != nil)
+        {
             [((SVGElement*)element.parent).fillColor set];
             [path fill];
-        } else {
+        }
+        else
+        {
             [[NSColor blackColor] set];
             [path fill];
         }
     }
 
-    if (element.strokeColor != nil) {
+    if (element.strokeColor != nil)
+    {
         [element.strokeColor set];
         path.lineWidth = element.strokeWidth; //(element.strokeWidth * scaleX);
         [path stroke];
     }
 
-    for (SVGElement *el in element.children) {
+    for (SVGElement *el in element.children)
+    {
         [self drawElement: el withTransform: transform];
     }
 }
@@ -177,7 +189,9 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor);
         }
 
         [transform scaleXBy: scaleFactor yBy: scaleFactor*-1.0f];
-    } else {
+    }
+    else
+    {
         scaleX = rect.size.width / self.size.width;
         scaleY = rect.size.height / self.size.height;
 
@@ -224,7 +238,8 @@ typedef struct
     BOOL validLastControlPoint;
 } TokenContext;
 
-@interface Token : NSObject {
+@interface Token : NSObject
+{
     @private
     unichar        _command;
     NSMutableArray *_values;
@@ -257,20 +272,26 @@ typedef struct
 
 @implementation Token
 
-+ (instancetype)tokenWithCommand:(unichar)commandChar {
++ (instancetype)tokenWithCommand:(unichar)commandChar
+{
     return [[self alloc] initWithCommand: commandChar];
 }
 
-- (instancetype)initWithCommand:(unichar)commandChar {
+- (instancetype)initWithCommand:(unichar)commandChar
+{
     self = [self init];
-    if (self) {
+
+    if (self)
+    {
         _command = commandChar;
         _values = [[NSMutableArray alloc] init];
     }
+
     return self;
 }
 
-- (void)addValue:(CGFloat)value {
+- (void)addValue:(CGFloat)value
+{
     #if CGFLOAT_IS_DOUBLE
     [_values addObject:[NSNumber numberWithDouble: value]];
     #else
@@ -278,7 +299,8 @@ typedef struct
     #endif
 }
 
-- (CGFloat)parameter:(NSUInteger)index {
+- (CGFloat)parameter:(NSUInteger)index
+{
     #if CGFLOAT_IS_DOUBLE
     return [[_values objectAtIndex: index] doubleValue];
     #else
@@ -288,7 +310,8 @@ typedef struct
 
 - (NSInteger)valence { return [_values count]; }
 
-- (NSUInteger)pointCount {
+- (NSUInteger)pointCount
+{
     return floor((_values.count / 2));
 }
 
@@ -296,7 +319,8 @@ typedef struct
 {
     index = index * 2;
 
-    if ((index + 1) < _values.count) {
+    if ((index + 1) < _values.count)
+    {
         return NSMakePoint([self parameter: index], [self parameter: index+1]);
     }
 
@@ -307,19 +331,29 @@ typedef struct
 {
     context->validLastControlPoint = NO;
 
-    for (NSUInteger i = 0; i < self.pointCount; i++) {
+    for (NSUInteger i = 0; i < self.pointCount; i++)
+    {
         NSPoint point = [self pointAtIndex: i];
 
-        if (i == 0) {
-            if (_command == 'M') {
+        if (i == 0)
+        {
+            if (_command == 'M')
+            {
                 [path moveToPoint: point];
-            } else {
+            }
+            else
+            {
                 [path relativeMoveToPoint: point];
             }
-        } else {
-            if (_command == 'M') {
+        }
+        else
+        {
+            if (_command == 'M')
+            {
                 [path lineToPoint: point];
-            } else {
+            }
+            else
+            {
                 [path relativeLineToPoint: point];
             }
         }
@@ -328,10 +362,14 @@ typedef struct
 
 - (void)_appendLCommand:(NSBezierPath*)path withContext:(TokenContext*)context
 {
-    for (NSUInteger i = 0; i < self.pointCount; i++) {
-        if (_command == 'L') {
+    for (NSUInteger i = 0; i < self.pointCount; i++)
+    {
+        if (_command == 'L')
+        {
             [path lineToPoint: [self pointAtIndex: i]];
-        } else {
+        }
+        else
+        {
             [path relativeLineToPoint: [self pointAtIndex: i]];
         }
     }
@@ -339,7 +377,8 @@ typedef struct
 
 - (void)_appendHCommand:(NSBezierPath*)path withContext:(TokenContext*)context
 {
-    for (NSUInteger i = 0; i < self.valence; i++) {
+    for (NSUInteger i = 0; i < self.valence; i++)
+    {
         NSPoint point = path.currentPoint;
         CGFloat x = [self parameter: i];
 
@@ -350,7 +389,8 @@ typedef struct
 
 - (void)_appendVCommand:(NSBezierPath*)path withContext:(TokenContext*)context
 {
-    for (NSUInteger i = 0; i < self.valence; i++) {
+    for (NSUInteger i = 0; i < self.valence; i++)
+    {
         NSPoint point = path.currentPoint;
         CGFloat y = [self parameter: i];
 
@@ -369,9 +409,12 @@ typedef struct
         NSPoint cp2 = [self pointAtIndex: index++];
         NSPoint point = [self pointAtIndex: index++];
 
-        if (_command == 'C') {
+        if (_command == 'C')
+        {
             [path curveToPoint: point controlPoint1: cp1 controlPoint2: cp2];
-        } else {
+        }
+        else
+        {
             NSPoint lastPoint = [path currentPoint];
 
             [path relativeCurveToPoint: point controlPoint1: cp1 controlPoint2: cp2];
@@ -397,12 +440,15 @@ typedef struct
         NSPoint cp2 = [self pointAtIndex: index++];
         NSPoint point = [self pointAtIndex: index++];
 
-        if (_command == 'S') {
+        if (_command == 'S')
+        {
             cp1.x += lastPoint.x;
             cp1.y += lastPoint.y;
 
             [path curveToPoint: point controlPoint1: cp1 controlPoint2: cp2];
-        } else {
+        }
+        else
+        {
             [path relativeCurveToPoint: point controlPoint1: cp1 controlPoint2: cp2];
 
             cp2.x += lastPoint.x;
@@ -423,9 +469,12 @@ typedef struct
         NSPoint cp1 = [self pointAtIndex: index++];
         NSPoint point = [self pointAtIndex: index++];
 
-        if (_command == 'Q') {
+        if (_command == 'Q')
+        {
             [path addQuadCurveToPoint: point controlPoint: cp1];
-        } else {
+        }
+        else
+        {
             NSPoint lastPoint = [path currentPoint];
 
             cp1.x += lastPoint.x;
@@ -462,10 +511,13 @@ typedef struct
             cp.y = lastPoint.y + (lastPoint.y - prevCtrl.y);
         }
 
-        if (_command == 'T') {
+        if (_command == 'T')
+        {
             NSLog(@"T command to %@ with cp: %@", NSStringFromPoint(point), NSStringFromPoint(cp));
             [path addQuadCurveToPoint: point controlPoint: cp];
-        } else {
+        }
+        else
+        {
             cp.x += lastPoint.x;
             cp.y += lastPoint.y;
 
@@ -540,10 +592,12 @@ typedef struct
 
 - (BOOL)scanHexInt:(unsigned int*)intValue
 {
-    if (self.length > 0) {
+    if (self.length > 0)
+    {
         NSScanner *scanner = [NSScanner scannerWithString: self];
 
-        if ([scanner scanHexInt: intValue]) {
+        if ([scanner scanHexInt: intValue])
+        {
             return YES;
         }
     }
@@ -562,7 +616,8 @@ typedef struct
     NSArray *tokens = GetPathTokensFromString(pathData);
     TokenContext context = {};
 
-    for (Token *token in tokens) {
+    for (Token *token in tokens)
+    {
         [token appendTokenToPath: path withContext: &context];
     }
 
@@ -576,9 +631,12 @@ typedef struct
 
     for (NSValue *value in points)
     {
-        if (path.empty) {
+        if (path.empty)
+        {
             [path moveToPoint: value.pointValue];
-        } else {
+        }
+        else
+        {
             [path lineToPoint: value.pointValue];
         }
     }
@@ -619,7 +677,8 @@ typedef struct
 
     parser.delegate = parserDelegate;
 
-    if ([parser parse]) {
+    if ([parser parse])
+    {
         document = parserDelegate->_document;
     }
 
@@ -631,19 +690,25 @@ typedef struct
                                        qualifiedName:(NSString *)qualifiedName
                                           attributes:(NSDictionary<NSString *,NSString *> *)attributeDict
 {
-    if ([elementName isEqualToString: @"svg"]) {
+    if ([elementName isEqualToString: @"svg"])
+    {
         _parentNode = _document = [SVGDocument nodeWithType: elementName andAttributes: attributeDict];
-    } else {
+    }
+    else
+    {
         SVGElement *node = [SVGElement nodeWithType: elementName andAttributes: attributeDict];
 
-        if (_parentNode != nil) {
+        if (_parentNode != nil)
+        {
             [_parentNode addChild: node];
 
             NSBezierPath *path = nil;
 
-            if ([node.type isEqualToString: @"path"]) {
+            if ([node.type isEqualToString: @"path"])
+            {
                 path = [NSBezierPath bezierPathWithSVGPathData: node.attributes[@"d"]];
-            } else if ([node.type isEqualToString: @"line"])
+            }
+            else if ([node.type isEqualToString: @"line"])
             {
                 NSPoint startPoint = NSMakePoint([node.attributes[@"x1"] floatValue],
                                                  [node.attributes[@"y1"] floatValue]);
@@ -654,11 +719,13 @@ typedef struct
 
                 [path moveToPoint: startPoint];
                 [path lineToPoint: endPoint];
-            } else if ([node.type isEqualToString: @"polyline"] ||
+            }
+            else if ([node.type isEqualToString: @"polyline"] ||
                        [node.type isEqualToString: @"polygon"])
             {
                 path = [NSBezierPath bezierPathWithSVGPolylineData: node.attributes[@"points"]];
-            } else if ([node.type isEqualToString: @"circle"])
+            }
+            else if ([node.type isEqualToString: @"circle"])
             {
                 NSPoint centerPoint = NSMakePoint([node.attributes[@"cx"] floatValue],
                                                   [node.attributes[@"cy"] floatValue]);
@@ -670,7 +737,8 @@ typedef struct
                                              radius * 2);
 
                 path = [NSBezierPath bezierPathWithOvalInRect: ovalRect];
-            } else if ([node.type isEqualToString: @"rect"])
+            }
+            else if ([node.type isEqualToString: @"rect"])
             {
                 NSRect rect = NSZeroRect;
                 CGFloat xRadius = 0.0f;
@@ -679,19 +747,23 @@ typedef struct
                 rect.size = NSMakeSize([node.attributes[@"width"] floatValue],
                                        [node.attributes[@"height"] floatValue]);
 
-                if (node.attributes[@"x"] != nil) {
+                if (node.attributes[@"x"] != nil)
+                {
                     rect.origin.x = [node.attributes[@"x"] floatValue];
                 }
 
-                if (node.attributes[@"y"] != nil) {
+                if (node.attributes[@"y"] != nil)
+                {
                     rect.origin.y = [node.attributes[@"y"] floatValue];
                 }
 
-                if (node.attributes[@"rx"] != nil) {
+                if (node.attributes[@"rx"] != nil)
+                {
                     xRadius = [node.attributes[@"rx"] floatValue];
                 }
 
-                if (node.attributes[@"ry"] != nil) {
+                if (node.attributes[@"ry"] != nil)
+                {
                     yRadius = [node.attributes[@"ry"] floatValue];
                 }
 
@@ -699,24 +771,30 @@ typedef struct
                                                        xRadius: xRadius
                                                        yRadius: yRadius];
 
-            } else {
+            }
+            else
+            {
                 //NSLog(@"unhandled node type: %@", node.type);
             }
 
-            if (node.attributes[@"style"] != nil) {
+            if (node.attributes[@"style"] != nil)
+            {
                 //NSDictionary *style = GetStylePropertiesFromString(node.attributes[@"style"]);
                 //NSLog(@"scanned style properties: %@", [node.attributes[@"style"] styleProperties]);
             }
 
-            if (node.attributes[@"fill"] != nil) {
+            if (node.attributes[@"fill"] != nil)
+            {
                 node.fillColor = NSColorFromSVGColorString(node.attributes[@"fill"]);
             }
 
-            if (node.attributes[@"stroke"] != nil) {
+            if (node.attributes[@"stroke"] != nil)
+            {
                 node.strokeColor = NSColorFromSVGColorString(node.attributes[@"stroke"]);
             }
 
-            if (node.attributes[@"stroke-width"] != nil) {
+            if (node.attributes[@"stroke-width"] != nil)
+            {
                 node.strokeWidth = [node.attributes[@"stroke-width"] floatValue];
             }
 
@@ -738,14 +816,17 @@ typedef struct
 
 @implementation SVGNode
 
-+ (instancetype)nodeWithType:(NSString*)type andAttributes:(NSDictionary*)attributes {
++ (instancetype)nodeWithType:(NSString*)type andAttributes:(NSDictionary*)attributes
+{
     return [[self alloc] initWithType: type andAttributes: attributes];
 }
 
-- (instancetype)initWithType:(NSString*)type andAttributes:(NSDictionary*)attributes {
+- (instancetype)initWithType:(NSString*)type andAttributes:(NSDictionary*)attributes
+{
     self = [self init];
     
-    if (self){
+    if (self)
+    {
         self.type = type;
         self.attributes = attributes;
     }
@@ -753,17 +834,20 @@ typedef struct
     return self;
 }
 
-- (id)init {
+- (id)init
+{
     self = [super init];
     
-    if (self) {
+    if (self)
+    {
         _children = [NSMutableArray array];
     }
     
     return self;
 }
 
-- (void)addChild:(SVGNode*)child {
+- (void)addChild:(SVGNode*)child
+{
     [((NSMutableArray*)self.children) addObject: child];
     child.parent = self;
 }
@@ -787,9 +871,12 @@ NSDictionary *GetStylePropertiesFromString(NSString *styleString)
     {
         scanCount++;
 
-        if ((scanCount % 2) != 0) {
+        if ((scanCount % 2) != 0)
+        {
             key = scannedString;
-        } else {
+        }
+        else
+        {
             properties[key] = scannedString;
         }
     }
@@ -814,14 +901,16 @@ NSArray *GetPathTokensFromString(NSString *pathString)
 
         if ([cmdset characterIsMember: curchar])
         {
-            if (commandLocation != NSNotFound) {
+            if (commandLocation != NSNotFound)
+            {
                 NSString *commandValues = [pathString substringWithRange: NSMakeRange(commandLocation + 1,
                                                                                       i - commandLocation - 1)];
                 NSScanner *floatScanner = [NSScanner scannerWithString: commandValues];
                 float floatValue;
                 floatScanner.charactersToBeSkipped = spaceset;
 
-                while ([floatScanner scanFloat: &floatValue]) {
+                while ([floatScanner scanFloat: &floatValue])
+                {
                     [token addValue: floatValue];
                 }
             }
@@ -850,9 +939,12 @@ NSArray *GetPolyPointsFromString(NSString *polyString)
     {
         scanCount++;
 
-        if ((scanCount % 2) != 0) {
+        if ((scanCount % 2) != 0)
+        {
             point.x = floatValue;
-        } else {
+        }
+        else
+        {
             point.y = floatValue;
             [points addObject: [NSValue valueWithPoint: point]];
         }
@@ -876,7 +968,8 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor)
             {
                 valid = YES;
             }
-        } else if (svgColor.length == 4)
+        }
+        else if (svgColor.length == 4)
         {
             if ([[svgColor substringWithRange: NSMakeRange(1,1)] scanHexInt: &redVal] &&
                 [[svgColor substringWithRange: NSMakeRange(2,1)] scanHexInt: &greenVal] &&
@@ -890,13 +983,16 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor)
             }
         }
 
-        if (valid) {
+        if (valid)
+        {
             return [NSColor colorWithRed: (redVal/255.0f)
                                    green: (greenVal/255.0f)
                                     blue: (blueVal/255.0f)
                                    alpha: 1.0f];
         }
-    } else if ([svgColor hasPrefix: @"rgb("]) {
+    }
+    else if ([svgColor hasPrefix: @"rgb("])
+    {
         int redVal = 0, greenVal = 0, blueVal = 0;
         NSString *rgbString = [svgColor substringFromIndex: 4];
         NSScanner *scanner = [NSScanner scannerWithString: rgbString];
@@ -909,7 +1005,9 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor)
                                     blue: (blueVal/255.0f)
                                    alpha: 1.0f];
         }
-    } else {
+    }
+    else
+    {
         NSDictionary *named = @{
             @"white" : [NSColor colorWithRed: 1.0f green: 1.0f blue: 1.0f alpha: 1.0f],
             @"silver" : [NSColor colorWithRed: 0.75f green: 0.75f blue: 0.75f alpha: 1.0f],
@@ -929,9 +1027,12 @@ NSColor *NSColorFromSVGColorString(NSString *svgColor)
             @"purple" : [NSColor purpleColor],
         };
 
-        if ([[svgColor lowercaseString] isEqualToString: @"none"]) {
+        if ([[svgColor lowercaseString] isEqualToString: @"none"])
+        {
             return nil;
-        } else {
+        }
+        else
+        {
             return named[[svgColor lowercaseString]];
         }
     }
